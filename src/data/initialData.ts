@@ -1,4 +1,54 @@
-import { AppDatabase, AppSettings, AreaItem, PriorityItem, ResponsibleItem, StatusItem, Ticket, TicketHistoryItem, UserProfile } from '../types';
+import { AppDatabase, AppSettings, AreaItem, PriorityItem, ResponsibleItem, StatusItem, Ticket, TicketHistoryItem, UserProfile, UserPermissions, UserRole } from '../types';
+
+export const getDefaultPermissions = (role: UserRole): UserPermissions => {
+  if (role === 'admin') {
+    return {
+      pode_criar_chamado: true,
+      pode_editar_chamado: true,
+      pode_concluir_chamado: true,
+      pode_reabrir_chamado: true,
+      pode_gerenciar_usuarios: true,
+      pode_gerenciar_areas: true,
+      pode_disparar_email: true,
+      pode_configurar_sistema: true,
+    };
+  }
+  if (role === 'coordenador') {
+    return {
+      pode_criar_chamado: true,
+      pode_editar_chamado: true,
+      pode_concluir_chamado: true,
+      pode_reabrir_chamado: true,
+      pode_gerenciar_usuarios: true,
+      pode_gerenciar_areas: true,
+      pode_disparar_email: true,
+      pode_configurar_sistema: false,
+    };
+  }
+  if (role === 'operador') {
+    return {
+      pode_criar_chamado: true,
+      pode_editar_chamado: true,
+      pode_concluir_chamado: true,
+      pode_reabrir_chamado: true,
+      pode_gerenciar_usuarios: false,
+      pode_gerenciar_areas: false,
+      pode_disparar_email: true,
+      pode_configurar_sistema: false,
+    };
+  }
+  // visualizador
+  return {
+    pode_criar_chamado: false,
+    pode_editar_chamado: false,
+    pode_concluir_chamado: false,
+    pode_reabrir_chamado: false,
+    pode_gerenciar_usuarios: false,
+    pode_gerenciar_areas: false,
+    pode_disparar_email: false,
+    pode_configurar_sistema: false,
+  };
+};
 
 export const defaultSettings: AppSettings = {
   sistema_nome: 'Painel de Passagem de Plantão TI',
@@ -18,13 +68,13 @@ export const defaultSettings: AppSettings = {
 };
 
 export const defaultUsers: UserProfile[] = [
-  { id: 'usr-1', nome: 'Wagner Marcelino', email: 'wagner.marcelino@hospital.org.br', cargo: 'Analista de Suporte Sênior', role: 'admin', ativo: true },
-  { id: 'usr-2', nome: 'Elias de Morais', email: 'elias.morais@hospital.org.br', cargo: 'Técnico de Suporte TI', role: 'operador', ativo: true },
-  { id: 'usr-3', nome: 'Edilson Aparecido', email: 'edilson.aparecido@hospital.org.br', cargo: 'Técnico de Redes e Infra', role: 'operador', ativo: true },
-  { id: 'usr-4', nome: 'Cai Cesar', email: 'cai.cesar@hospital.org.br', cargo: 'Analista de Sistemas', role: 'operador', ativo: true },
-  { id: 'usr-5', nome: 'Pedro Augusto', email: 'pedro.augusto@hospital.org.br', cargo: 'Técnico de Hardware', role: 'operador', ativo: true },
-  { id: 'usr-6', nome: 'Hugo Alves', email: 'hugo.alves@hospital.org.br', cargo: 'Suporte Técnico N1', role: 'operador', ativo: true },
-  { id: 'usr-7', nome: 'Fátima Araújo', email: 'fatima.araujo@hospital.org.br', cargo: 'Supervisora de TI e Plantão', role: 'admin', ativo: true },
+  { id: 'usr-1', nome: 'Wagner Marcelino', email: 'wagner.marcelino@hospital.org.br', cargo: 'Analista de Suporte Sênior', role: 'admin', permissoes: getDefaultPermissions('admin'), ativo: true },
+  { id: 'usr-2', nome: 'Elias de Morais', email: 'elias.morais@hospital.org.br', cargo: 'Técnico de Suporte TI', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
+  { id: 'usr-3', nome: 'Edilson Aparecido', email: 'edilson.aparecido@hospital.org.br', cargo: 'Técnico de Redes e Infra', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
+  { id: 'usr-4', nome: 'Cai Cesar', email: 'cai.cesar@hospital.org.br', cargo: 'Analista de Sistemas', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
+  { id: 'usr-5', nome: 'Pedro Augusto', email: 'pedro.augusto@hospital.org.br', cargo: 'Técnico de Hardware', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
+  { id: 'usr-6', nome: 'Hugo Alves', email: 'hugo.alves@hospital.org.br', cargo: 'Suporte Técnico N1', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
+  { id: 'usr-7', nome: 'Fátima Araújo', email: 'fatima.araujo@hospital.org.br', cargo: 'Supervisora de TI e Plantão', role: 'coordenador', permissoes: getDefaultPermissions('coordenador'), ativo: true },
 ];
 
 export const defaultAreas: AreaItem[] = [

@@ -16,7 +16,7 @@ import {
 import { generateShiftPDF, exportTicketsToExcel, exportTicketsToCSV } from '../utils/exportUtils';
 import { PriorityBadge } from './PriorityBadge';
 import { StatusBadge } from './StatusBadge';
-import { Ticket, UserProfile, AppSettings, ShiftReport } from '../types';
+import { Ticket, UserProfile, AppSettings, ShiftReport, SHIFT_OPTIONS, ShiftOption } from '../types';
 
 interface ReportAndEmailViewProps {
   allTickets: Ticket[];
@@ -33,7 +33,7 @@ export const ReportAndEmailView: React.FC<ReportAndEmailViewProps> = ({
   onSaveShiftReport,
   onUpdateSettings,
 }) => {
-  const [shiftTurno, setShiftTurno] = useState('Plantão Diurno (07:00 - 19:00)');
+  const [shiftTurno, setShiftTurno] = useState<ShiftOption | string>(SHIFT_OPTIONS[0]);
   const [responsavelTurno, setResponsavelTurno] = useState(currentUser.nome);
   const [proximoResponsavel, setProximoResponsavel] = useState('Elias de Morais');
   const [emailRecipients, setEmailRecipients] = useState(settings.destinatarios_padrao.join(', '));
@@ -184,9 +184,11 @@ ${emailCustomMessage}
                   onChange={(e) => setShiftTurno(e.target.value)}
                   className="w-full bg-[#06151c] border border-teal-800 rounded-xl px-2.5 py-1.5 text-slate-200 outline-none focus:border-teal-400"
                 >
-                  <option value="Plantão Diurno (07:00 - 19:00)">Diurno (07h - 19h)</option>
-                  <option value="Plantão Noturno (19:00 - 07:00)">Noturno (19h - 07h)</option>
-                  <option value="Plantão Comercial (08:00 - 18:00)">Comercial (08h - 18h)</option>
+                  {SHIFT_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
                 </select>
               </div>
 

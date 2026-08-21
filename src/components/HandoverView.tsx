@@ -20,7 +20,7 @@ import confetti from 'canvas-confetti';
 import { PriorityBadge } from './PriorityBadge';
 import { StatusBadge } from './StatusBadge';
 import { generateShiftPDF, exportTicketsToExcel } from '../utils/exportUtils';
-import { Ticket, UserProfile, AppSettings, ShiftReport } from '../types';
+import { Ticket, UserProfile, AppSettings, ShiftReport, SHIFT_OPTIONS, ShiftOption } from '../types';
 
 interface HandoverViewProps {
   tickets: Ticket[];
@@ -45,7 +45,7 @@ export const HandoverView: React.FC<HandoverViewProps> = ({
   onSaveShiftReport,
   onNavigateToEmail,
 }) => {
-  const [selectedShift, setSelectedShift] = useState<'Plantão Diurno (07:00 - 19:00)' | 'Plantão Noturno (19:00 - 07:00)' | 'Plantão Comercial (08:00 - 18:00)'>('Plantão Diurno (07:00 - 19:00)');
+  const [selectedShift, setSelectedShift] = useState<ShiftOption | string>(SHIFT_OPTIONS[0]);
   const [receiverName, setReceiverName] = useState(users[1]?.nome || 'Elias de Morais');
   const [handoverNotes, setHandoverNotes] = useState('');
   const [isHandoverCompleted, setIsHandoverCompleted] = useState(false);
@@ -134,12 +134,14 @@ export const HandoverView: React.FC<HandoverViewProps> = ({
                 <label className="text-[10px] text-teal-400/80 font-bold uppercase">Turno Atual</label>
                 <select
                   value={selectedShift}
-                  onChange={(e) => setSelectedShift(e.target.value as any)}
+                  onChange={(e) => setSelectedShift(e.target.value)}
                   className="w-full bg-[#081d26] border border-teal-800 rounded-lg px-2 py-1 text-slate-200 text-xs mt-0.5 outline-none focus:border-teal-400"
                 >
-                  <option value="Plantão Diurno (07:00 - 19:00)">Diurno (07h - 19h)</option>
-                  <option value="Plantão Noturno (19:00 - 07:00)">Noturno (19h - 07h)</option>
-                  <option value="Plantão Comercial (08:00 - 18:00)">Comercial (08h - 18h)</option>
+                  {SHIFT_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
                 </select>
               </div>
 

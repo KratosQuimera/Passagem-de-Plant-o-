@@ -15,7 +15,7 @@ import {
   Clock,
   UserCheck
 } from 'lucide-react';
-import { Ticket, UserProfile, AppSettings, ShiftReport } from '../types';
+import { Ticket, UserProfile, AppSettings, ShiftReport, SHIFT_OPTIONS, ShiftOption } from '../types';
 import { generateShiftPDF, exportTicketsToExcel } from '../utils/exportUtils';
 import { PriorityBadge } from './PriorityBadge';
 import { StatusBadge } from './StatusBadge';
@@ -40,13 +40,13 @@ export const SendEmailModal: React.FC<SendEmailModalProps> = ({
   onSaveShiftReport,
   onGoToFullReport,
 }) => {
-  const [shiftTurno, setShiftTurno] = useState('Plantão Diurno (07:00 - 19:00)');
+  const [shiftTurno, setShiftTurno] = useState<ShiftOption | string>(SHIFT_OPTIONS[0]);
   const [responsavelTurno, setResponsavelTurno] = useState(currentUser.nome);
   const [proximoResponsavel, setProximoResponsavel] = useState('Elias de Morais');
   const [emailRecipients, setEmailRecipients] = useState(settings.destinatarios_padrao.join(', '));
   const [emailCC, setEmailCC] = useState(settings.destinatarios_cc.join(', '));
   const [emailSubject, setEmailSubject] = useState(
-    `[TI] Relatório de Passagem de Plantão - ${new Date().toLocaleDateString('pt-BR')} - ${shiftTurno.split(' ')[0]}`
+    `[TI-HAOC] Relatório de Passagem de Plantão - ${new Date().toLocaleDateString('pt-BR')} - ${SHIFT_OPTIONS[0]}`
   );
   const [customNotes, setCustomNotes] = useState(settings.corpo_padrao || '');
   const [isCopied, setIsCopied] = useState(false);
@@ -264,9 +264,11 @@ Hospital Alemão Oswaldo Cruz
                       onChange={(e) => setShiftTurno(e.target.value)}
                       className="w-full bg-[#05161d] border border-teal-800 rounded-lg px-2.5 py-1.5 text-slate-200 outline-none focus:border-teal-400"
                     >
-                      <option value="Plantão Diurno (07:00 - 19:00)">Diurno (07h - 19h)</option>
-                      <option value="Plantão Noturno (19:00 - 07:00)">Noturno (19h - 07h)</option>
-                      <option value="Plantão Comercial (08:00 - 18:00)">Comercial (08h - 18h)</option>
+                      {SHIFT_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div>

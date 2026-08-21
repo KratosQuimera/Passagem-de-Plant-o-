@@ -58,10 +58,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const getShiftName = (d: Date) => {
     const hours = d.getHours();
-    if (hours >= 7 && hours < 19) {
-      return 'Plantão Diurno (07h às 19h)';
+    if (hours >= 7 && hours < 17) {
+      return 'Diurno 07:00 16:48';
+    } else if (hours >= 17 && hours < 20) {
+      return 'Diurno 10:00 20:48';
+    } else if (hours >= 20 || hours < 6) {
+      return 'Noturno 20:12 06:00';
     }
-    return 'Plantão Noturno (19h às 07h)';
+    return 'Diurno 06:00 15:48';
   };
 
   interface NavItem {

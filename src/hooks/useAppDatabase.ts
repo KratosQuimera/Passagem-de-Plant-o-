@@ -40,9 +40,11 @@ export function useAppDatabase() {
     getHistoryForTicket: dbStore.getHistoryForTicket.bind(dbStore),
     addArea: dbStore.addArea.bind(dbStore),
     updateArea: dbStore.updateArea.bind(dbStore),
+    deleteArea: dbStore.deleteArea.bind(dbStore),
     toggleAreaActive: dbStore.toggleAreaActive.bind(dbStore),
     addResponsible: dbStore.addResponsible.bind(dbStore),
     updateResponsible: dbStore.updateResponsible.bind(dbStore),
+    deleteResponsible: dbStore.deleteResponsible.bind(dbStore),
     toggleResponsibleActive: dbStore.toggleResponsibleActive.bind(dbStore),
     addStatus: dbStore.addStatus.bind(dbStore),
     updateSettings: dbStore.updateSettings.bind(dbStore),
@@ -50,6 +52,7 @@ export function useAppDatabase() {
     setCurrentUser: dbStore.setCurrentUser.bind(dbStore),
     addUser: dbStore.addUser.bind(dbStore),
     updateUser: dbStore.updateUser.bind(dbStore),
+    deleteUser: dbStore.deleteUser.bind(dbStore),
     resetToDefaults: dbStore.resetToDefaults.bind(dbStore),
   };
 }

@@ -332,6 +332,11 @@ class DatabaseStore {
     }
   }
 
+  public deleteArea(id: string) {
+    this.db.areas = this.db.areas.filter((a) => a.id !== id);
+    this.notify();
+  }
+
   public toggleAreaActive(id: string) {
     const index = this.db.areas.findIndex((a) => a.id === id);
     if (index !== -1) {
@@ -359,6 +364,11 @@ class DatabaseStore {
       this.db.responsibles[index] = { ...this.db.responsibles[index], ...updates };
       this.notify();
     }
+  }
+
+  public deleteResponsible(id: string) {
+    this.db.responsibles = this.db.responsibles.filter((r) => r.id !== id);
+    this.notify();
   }
 
   public toggleResponsibleActive(id: string) {
@@ -426,6 +436,17 @@ class DatabaseStore {
       }
       this.notify();
     }
+  }
+
+  public deleteUser(id: string) {
+    if (this.db.users.length <= 1) {
+      throw new Error('Não é possível excluir o único usuário do sistema.');
+    }
+    this.db.users = this.db.users.filter((u) => u.id !== id);
+    if (this.currentUser.id === id) {
+      this.currentUser = this.db.users[0];
+    }
+    this.notify();
   }
 
   public resetToDefaults() {

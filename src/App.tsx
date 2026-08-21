@@ -46,13 +46,18 @@ export default function App() {
     getHistoryForTicket,
     addArea,
     updateArea,
+    deleteArea,
     toggleAreaActive,
     addResponsible,
     updateResponsible,
+    deleteResponsible,
     toggleResponsibleActive,
     updateSettings,
     saveShiftReport,
     setCurrentUser,
+    addUser,
+    updateUser,
+    deleteUser,
     resetToDefaults,
   } = useAppDatabase();
 
@@ -255,10 +260,18 @@ export default function App() {
               currentUser={currentUser}
               onAddArea={addArea}
               onUpdateArea={updateArea}
+              onDeleteArea={deleteArea}
               onToggleArea={toggleAreaActive}
               onAddResponsible={addResponsible}
               onUpdateResponsible={updateResponsible}
+              onDeleteResponsible={deleteResponsible}
               onToggleResponsible={toggleResponsibleActive}
+              onAddUser={addUser}
+              onUpdateUser={updateUser}
+              onDeleteUser={(id) => {
+                deleteUser(id);
+                showToast('Usuário excluído com sucesso!', 'info');
+              }}
               onUpdateSettings={updateSettings}
               onResetData={() => {
                 resetToDefaults();

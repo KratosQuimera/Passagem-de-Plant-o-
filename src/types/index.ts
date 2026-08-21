@@ -1,3 +1,45 @@
+export type ShiftOption = 
+  | 'Diurno 07:00 16:48'
+  | 'Diurno 06:00 15:48'
+  | 'Diurno 09:00 18:48'
+  | 'Diurno 10:00 20:48'
+  | 'Comercial 08:00 17:48'
+  | 'Noturno 19:12 05:00'
+  | 'Noturno 20:12 06:00';
+
+export const SHIFT_OPTIONS: ShiftOption[] = [
+  'Diurno 07:00 16:48',
+  'Diurno 06:00 15:48',
+  'Diurno 09:00 18:48',
+  'Diurno 10:00 20:48',
+  'Comercial 08:00 17:48',
+  'Noturno 19:12 05:00',
+  'Noturno 20:12 06:00',
+];
+
+export type UserRole = 'admin' | 'coordenador' | 'operador' | 'visualizador';
+
+export interface UserPermissions {
+  pode_criar_chamado: boolean;
+  pode_editar_chamado: boolean;
+  pode_concluir_chamado: boolean;
+  pode_reabrir_chamado: boolean;
+  pode_gerenciar_usuarios: boolean;
+  pode_gerenciar_areas: boolean;
+  pode_disparar_email: boolean;
+  pode_configurar_sistema: boolean;
+}
+
+export interface UserProfile {
+  id: string;
+  nome: string;
+  email: string;
+  cargo: string;
+  role: UserRole;
+  permissoes?: UserPermissions;
+  ativo: boolean;
+}
+
 export interface Ticket {
   id: string;
   numero_chamado: string;
@@ -28,15 +70,6 @@ export interface TicketHistoryItem {
   valor_novo?: string;
   descricao: string;
   data_hora: string;
-}
-
-export interface UserProfile {
-  id: string;
-  nome: string;
-  email: string;
-  cargo: string;
-  role: 'admin' | 'operador';
-  ativo: boolean;
 }
 
 export interface AreaItem {
@@ -75,7 +108,7 @@ export interface ShiftReport {
   id: string;
   data: string;
   horario_plantao: string;
-  turno: 'Manhã (07:00 - 19:00)' | 'Noite (19:00 - 07:00)' | 'Comercial (08:00 - 18:00)' | 'Plantão 24h' | string;
+  turno: ShiftOption | string;
   responsavel_plantao: string;
   responsavel_passagem?: string;
   responsavel_recebimento?: string;
@@ -120,3 +153,4 @@ export interface AppDatabase {
   shifts: ShiftReport[];
   settings: AppSettings;
 }
+
