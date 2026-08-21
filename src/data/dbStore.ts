@@ -7,11 +7,24 @@ const CURRENT_USER_KEY = 'painel_plantao_ti_current_user_v1';
 class DatabaseStore {
   private db: AppDatabase;
   private listeners: Set<() => void> = new Set();
-  private currentUser: UserProfile | null;
+  private currentUser: UserProfile | null = null;
 
   constructor() {
     this.db = this.loadFromStorage();
     this.currentUser = this.loadCurrentUser();
+
+    // Sincronizar automaticamente entre abas / janelas caso o app seja aberto em múltiplas instâncias
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (event) => {
+        if (event.key === DB_KEY) {
+          this.db = this.loadFromStorage();
+          this.listeners.forEach((listener) => listener());
+        } else if (event.key === CURRENT_USER_KEY) {
+          this.currentUser = this.loadCurrentUser();
+          this.listeners.forEach((listener) => listener());
+        }
+      });
+    }
   }
 
   private loadFromStorage(): AppDatabase {
@@ -19,9 +32,8 @@ class DatabaseStore {
       const stored = localStorage.getItem(DB_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Merge with initial defaults if missing fields
         const initial = getInitialDatabase();
-        const rawUsers = parsed.users || initial.users;
+        const rawUsers = Array.isArray(parsed.users) ? parsed.users : initial.users;
         const users: UserProfile[] = rawUsers.map((u: any, idx: number) => ({
           ...u,
           usuario: u.usuario || (u.nome ? u.nome.split(' ')[0] : `usuario${idx + 1}`),
@@ -29,14 +41,14 @@ class DatabaseStore {
         }));
 
         return {
-          tickets: parsed.tickets || initial.tickets,
-          history: parsed.history || initial.history,
+          tickets: Array.isArray(parsed.tickets) ? parsed.tickets : initial.tickets,
+          history: Array.isArray(parsed.history) ? parsed.history : initial.history,
           users,
-          areas: parsed.areas || initial.areas,
-          responsibles: parsed.responsibles || initial.responsibles,
-          statuses: parsed.statuses || initial.statuses,
-          priorities: parsed.priorities || initial.priorities,
-          shifts: parsed.shifts || initial.shifts,
+          areas: Array.isArray(parsed.areas) ? parsed.areas : initial.areas,
+          responsibles: Array.isArray(parsed.responsibles) ? parsed.responsibles : initial.responsibles,
+          statuses: Array.isArray(parsed.statuses) ? parsed.statuses : initial.statuses,
+          priorities: Array.isArray(parsed.priorities) ? parsed.priorities : initial.priorities,
+          shifts: Array.isArray(parsed.shifts) ? parsed.shifts : initial.shifts,
           settings: { ...initial.settings, ...(parsed.settings || {}) },
         };
       }
@@ -77,6 +89,13 @@ class DatabaseStore {
 
   private notify() {
     this.saveToStorage(this.db);
+    if (this.currentUser) {
+      try {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(this.currentUser));
+      } catch (e) {
+        console.error('Error preserving current user on notify:', e);
+      }
+    }
     this.listeners.forEach((listener) => listener());
   }
 

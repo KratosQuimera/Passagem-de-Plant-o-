@@ -76,10 +76,12 @@ export const Navbar: React.FC<NavbarProps> = ({
     id: 'painel' | 'passagem' | 'historico' | 'dashboard' | 'relatorios' | 'configuracoes';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
-    badge?: number;
+    badge?: number | string;
     badgeColor?: string;
     highlight?: boolean;
   }
+
+  const isAdmin = currentUser.role === 'admin';
 
   const navItems: NavItem[] = [
     {
@@ -116,6 +118,8 @@ export const Navbar: React.FC<NavbarProps> = ({
       id: 'configuracoes',
       label: 'Configurações',
       icon: Settings,
+      badge: !isAdmin ? '🔒 Admin' : undefined,
+      badgeColor: 'bg-amber-950/90 text-amber-300 border border-amber-800/80',
     },
   ];
 
@@ -227,14 +231,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <button
                         key={u.id}
                         onClick={() => {
-                          onSwitchUser(u);
                           setIsUserMenuOpen(false);
+                          if (u.id !== currentUser.id && onLogout) {
+                            onLogout();
+                          }
                         }}
                         className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition text-left cursor-pointer ${
                           u.id === currentUser.id
                             ? 'bg-teal-600/20 text-teal-300 border border-teal-500/40 font-bold'
                             : 'hover:bg-teal-950/60 text-slate-300'
                         }`}
+                        title={u.id === currentUser.id ? 'Usuário conectado' : `Trocar para ${u.nome} (Requer Senha)`}
                       >
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-teal-900 border border-teal-700 flex items-center justify-center font-bold text-[10px] text-teal-200">
@@ -245,9 +252,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                             <div className="text-[10px] text-teal-400/70">{u.cargo}</div>
                           </div>
                         </div>
-                        {u.role === 'admin' && (
+                        {u.role === 'admin' ? (
                           <Shield className="w-3.5 h-3.5 text-amber-400 shrink-0" title="Administrador" />
-                        )}
+                        ) : u.id === currentUser.id ? (
+                          <span className="text-[10px] text-teal-400 font-bold">Ativo</span>
+                        ) : null}
                       </button>
                     ))}
                   </div>

@@ -307,6 +307,77 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     }
   };
 
+  // If user is not an administrator, strictly block access to administrative controls and liberações
+  if (!isAdmin) {
+    return (
+      <div className="space-y-6 text-slate-200 animate-in fade-in duration-200">
+        {/* Header */}
+        <div className="bg-[#0a1e27] border border-teal-800/80 rounded-2xl p-6 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+              <Lock className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white tracking-tight">
+                Controle de Acesso Administrativo
+              </h2>
+              <p className="text-xs text-teal-300/80">
+                Hospital Alemão Oswaldo Cruz • Acesso restrito a administradores de TI
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="bg-teal-950/80 text-teal-300 border border-teal-700/60 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5">
+              <Shield className="w-4 h-4 text-teal-400" />
+              <span>Sessão: {currentUser.nome} ({currentUser.role.toUpperCase()})</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Security Restriction Card */}
+        <div className="bg-gradient-to-br from-[#0a1e27] via-[#06151c] to-[#041117] border border-teal-800/80 rounded-3xl p-8 sm:p-12 shadow-2xl text-center space-y-6 max-w-2xl mx-auto my-8">
+          <div className="w-20 h-20 mx-auto rounded-3xl bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center text-amber-400 shadow-xl shadow-amber-950/40">
+            <Lock className="w-10 h-10 stroke-[2.2]" />
+          </div>
+
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/80 border border-amber-700/60 text-amber-300 text-xs font-bold uppercase tracking-wider">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Acesso Restrito ao Administrador</span>
+            </div>
+            <h3 className="text-2xl font-bold text-white">
+              Liberações e Configurações Bloqueadas
+            </h3>
+            <p className="text-sm text-slate-300 max-w-lg mx-auto leading-relaxed">
+              Somente o <strong>usuário administrativo</strong> tem autorização para realizar liberações no sistema, gerenciar permissões de acesso, cadastrar ou excluir colaboradores e alterar parâmetros hospitalares.
+            </p>
+          </div>
+
+          <div className="bg-[#071922] border border-teal-900/80 rounded-2xl p-4 text-xs text-left text-slate-300 space-y-2 max-w-md mx-auto">
+            <div className="font-bold text-teal-300 flex items-center gap-1.5">
+              <Check className="w-4 h-4 text-emerald-400" />
+              <span>Suas permissões ativas de plantão:</span>
+            </div>
+            <ul className="list-disc list-inside space-y-1 text-slate-400 pl-1">
+              <li>Criar, atender e atualizar chamados de TI</li>
+              <li>Registrar passagem de turno e ocorrências</li>
+              <li>Consultar histórico de chamados</li>
+              <li>Acompanhar dashboards operacionais</li>
+            </ul>
+          </div>
+
+          <div className="pt-2">
+            <div className="inline-flex items-center gap-2 bg-[#06151c] text-teal-300 border border-teal-800/80 font-semibold px-5 py-2.5 rounded-xl text-xs shadow">
+              <Shield className="w-4 h-4 text-amber-300" />
+              <span>Para liberações no sistema, faça login como Administrador</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 text-slate-200">
       {/* Header */}
@@ -326,33 +397,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 ${
-            isAdmin 
-              ? 'bg-amber-950/80 text-amber-300 border border-amber-700/60'
-              : 'bg-teal-950/80 text-teal-300 border border-teal-700/60'
-          }`}>
-            <ShieldCheck className="w-4 h-4 text-teal-400" />
-            <span>Perfil: {currentUser.nome} ({currentUser.role.toUpperCase()})</span>
+          <span className="bg-amber-950/80 text-amber-300 border border-amber-700/60 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-amber-400" />
+            <span>Administrador: {currentUser.nome}</span>
           </span>
         </div>
       </div>
-
-      {/* Non-Admin Restriction Warning Banner */}
-      {!isAdmin && (
-        <div className="bg-amber-950/30 border border-amber-800/60 rounded-2xl p-4 flex items-start gap-3 text-amber-200 text-xs">
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <div className="font-bold text-amber-300">
-              Modo Somente Leitura — Acesso Restrito a Administradores
-            </div>
-            <p className="text-amber-200/80 leading-relaxed">
-              Você está autenticado como <strong>{currentUser.nome}</strong> ({currentUser.cargo || currentUser.role}). 
-              Apenas usuários com perfil de <strong>Administrador</strong> têm permissão para cadastrar, editar ou excluir colaboradores, setores e configurações globais. 
-              Suas permissões operacionais de atendimento a chamados permanecem ativas nos painéis de plantão.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Settings Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-teal-900/60 pb-2 overflow-x-auto no-scrollbar">
