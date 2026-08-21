@@ -23,7 +23,7 @@ import { TicketRow } from './TicketRow';
 import { TicketCardMobile } from './TicketCardMobile';
 import { PriorityBadge } from './PriorityBadge';
 import { exportTicketsToExcel, exportTicketsToCSV } from '../utils/exportUtils';
-import { Ticket, AreaItem, ResponsibleItem, StatusItem, PriorityItem } from '../types';
+import { Ticket, AreaItem, ResponsibleItem, StatusItem, PriorityItem, UserProfile } from '../types';
 
 interface OperationalTableProps {
   tickets: Ticket[];
@@ -31,6 +31,7 @@ interface OperationalTableProps {
   responsibles: ResponsibleItem[];
   statuses: StatusItem[];
   priorities: PriorityItem[];
+  currentUser?: UserProfile;
   onUpdateTicket: (id: string, updates: Partial<Ticket>) => void;
   onConcludeTicket: (ticket: Ticket) => void;
   onEditTicket: (ticket: Ticket) => void;
@@ -45,6 +46,7 @@ export const OperationalTable: React.FC<OperationalTableProps> = ({
   responsibles,
   statuses,
   priorities,
+  currentUser,
   onUpdateTicket,
   onConcludeTicket,
   onEditTicket,
@@ -60,6 +62,10 @@ export const OperationalTable: React.FC<OperationalTableProps> = ({
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [sortBy, setSortBy] = useState<'criado_em' | 'prioridade' | 'area' | 'status'>('criado_em');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  const canCreate = currentUser?.permissoes?.pode_criar_chamado ?? true;
+  const canEdit = currentUser?.permissoes?.pode_editar_chamado ?? true;
+  const canConclude = currentUser?.permissoes?.pode_concluir_chamado ?? true;
 
   // Filter and sort tickets
   const filteredTickets = useMemo(() => {
@@ -253,14 +259,16 @@ export const OperationalTable: React.FC<OperationalTableProps> = ({
               </button>
             )}
 
-            {/* Novo Chamado button */}
-            <button
-              onClick={onOpenNewModal}
-              className="flex items-center gap-1.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 active:from-teal-700 active:to-cyan-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-teal-950/50 border border-teal-400/30 transition cursor-pointer"
-            >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>Novo Chamado</span>
-            </button>
+            {/* Novo Chamado button (rendered if user has create permission) */}
+            {canCreate && (
+              <button
+                onClick={onOpenNewModal}
+                className="flex items-center gap-1.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 active:from-teal-700 active:to-cyan-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg shadow-teal-950/50 border border-teal-400/30 transition cursor-pointer"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Novo Chamado</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -505,6 +513,8 @@ export const OperationalTable: React.FC<OperationalTableProps> = ({
                         responsibles={responsibles}
                         statuses={statuses}
                         priorities={priorities}
+                        canEdit={canEdit}
+                        canConclude={canConclude}
                         onUpdate={onUpdateTicket}
                         onConclude={onConcludeTicket}
                         onEdit={onEditTicket}
@@ -523,6 +533,8 @@ export const OperationalTable: React.FC<OperationalTableProps> = ({
               <TicketCardMobile
                 key={ticket.id}
                 ticket={ticket}
+                canEdit={canEdit}
+                canConclude={canConclude}
                 onConclude={onConcludeTicket}
                 onEdit={onEditTicket}
                 onViewHistory={onViewHistory}

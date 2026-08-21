@@ -16,6 +16,7 @@ import { EditTicketModal } from './components/EditTicketModal';
 import { ConcludeTicketModal } from './components/ConcludeTicketModal';
 import { TicketTimelineModal } from './components/TicketTimelineModal';
 import { SendEmailModal } from './components/SendEmailModal';
+import { LoginModal } from './components/LoginModal';
 import { useAppDatabase } from './hooks/useAppDatabase';
 import { Ticket, UserProfile } from './types';
 import { CheckCircle2, AlertCircle, Info, Sparkles } from 'lucide-react';
@@ -55,6 +56,7 @@ export default function App() {
     updateSettings,
     saveShiftReport,
     setCurrentUser,
+    logout,
     addUser,
     updateUser,
     deleteUser,
@@ -83,12 +85,14 @@ export default function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        setIsNewModalOpen(true);
+        if (currentUser?.permissoes?.pode_criar_chamado ?? true) {
+          setIsNewModalOpen(true);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [currentUser]);
 
   // Handlers for Ticket Actions
   const handleOpenEdit = (ticket: Ticket) => {
@@ -141,6 +145,21 @@ export default function App() {
     );
   };
 
+  // If user is not logged in, force Login screen
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-[#07171e] text-slate-200 flex flex-col font-sans selection:bg-[#00a2b4] selection:text-white">
+        <LoginModal
+          users={users}
+          onLogin={(user) => {
+            setCurrentUser(user);
+            showToast(`Bem-vindo, ${user.nome}! Sessão iniciada como ${user.cargo}.`, 'success');
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#07171e] text-slate-200 flex flex-col font-sans selection:bg-[#00a2b4] selection:text-white">
       {/* Top Navbar & Sidebar */}
@@ -156,6 +175,10 @@ export default function App() {
         onSwitchUser={(u: UserProfile) => {
           setCurrentUser(u);
           showToast(`Operador alterado para ${u.nome} (${u.cargo})`, 'info');
+        }}
+        onLogout={() => {
+          logout();
+          showToast('Sessão encerrada com sucesso.', 'info');
         }}
         settings={settings}
       />
@@ -191,6 +214,7 @@ export default function App() {
               responsibles={responsibles}
               statuses={statuses}
               priorities={priorities}
+              currentUser={currentUser}
               onUpdateTicket={handleUpdateTicket}
               onConcludeTicket={handleOpenConclude}
               onEditTicket={handleOpenEdit}
@@ -223,6 +247,7 @@ export default function App() {
               areas={areas}
               responsibles={responsibles}
               statuses={statuses}
+              currentUser={currentUser}
               onViewTimeline={handleOpenTimeline}
               onReopenTicket={handleReopenTicket}
             />

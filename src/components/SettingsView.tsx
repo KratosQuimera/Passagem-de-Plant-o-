@@ -85,6 +85,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [userFormData, setUserFormData] = useState<{
     nome: string;
+    usuario: string;
+    senha: string;
     email: string;
     cargo: string;
     role: UserRole;
@@ -92,6 +94,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     permissoes: UserPermissions;
   }>({
     nome: '',
+    usuario: '',
+    senha: '',
     email: '',
     cargo: '',
     role: 'operador',
@@ -126,6 +130,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     setEditingUser(null);
     setUserFormData({
       nome: '',
+      usuario: '',
+      senha: '16763',
       email: '',
       cargo: 'Técnico de Suporte TI',
       role: 'operador',
@@ -139,6 +145,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     setEditingUser(user);
     setUserFormData({
       nome: user.nome,
+      usuario: user.usuario || user.nome.split(' ')[0],
+      senha: user.senha || '16763',
       email: user.email,
       cargo: user.cargo,
       role: user.role,
@@ -170,9 +178,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     e.preventDefault();
     if (!userFormData.nome.trim()) return;
 
+    const fallbackUsername = userFormData.usuario.trim() || userFormData.nome.trim().split(' ')[0];
+    const fallbackPassword = userFormData.senha.trim() || '16763';
+
     if (editingUser && onUpdateUser) {
       onUpdateUser(editingUser.id, {
         nome: userFormData.nome.trim(),
+        usuario: fallbackUsername,
+        senha: fallbackPassword,
         email: userFormData.email.trim(),
         cargo: userFormData.cargo.trim(),
         role: userFormData.role,
@@ -182,6 +195,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     } else if (onAddUser) {
       onAddUser({
         nome: userFormData.nome.trim(),
+        usuario: fallbackUsername,
+        senha: fallbackPassword,
         email: userFormData.email.trim(),
         cargo: userFormData.cargo.trim(),
         role: userFormData.role,
@@ -406,7 +421,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                           )}
                         </div>
                         <div className="text-xs text-teal-300/80">{user.cargo}</div>
-                        <div className="text-[11px] text-slate-400 font-mono">{user.email}</div>
+                        <div className="text-[11px] text-slate-400 font-mono flex items-center gap-2">
+                          <span className="text-teal-400 font-bold">@{user.usuario || user.nome.split(' ')[0]}</span>
+                          <span>•</span>
+                          <span>{user.email}</span>
+                        </div>
                       </div>
                     </div>
 
@@ -921,6 +940,34 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     onChange={(e) => setUserFormData({ ...userFormData, email: e.target.value })}
                     placeholder="nome@hospital.org.br"
                     className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Nome de Usuário (Login) <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={userFormData.usuario}
+                    onChange={(e) => setUserFormData({ ...userFormData, usuario: e.target.value })}
+                    placeholder="Ex: Wagner"
+                    className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400 font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Senha de Acesso <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={userFormData.senha}
+                    onChange={(e) => setUserFormData({ ...userFormData, senha: e.target.value })}
+                    placeholder="Ex: 16763"
+                    className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400 font-mono"
                   />
                 </div>
 

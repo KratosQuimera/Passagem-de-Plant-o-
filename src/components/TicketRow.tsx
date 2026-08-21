@@ -21,6 +21,8 @@ interface TicketRowProps {
   responsibles: ResponsibleItem[];
   statuses: StatusItem[];
   priorities: PriorityItem[];
+  canEdit?: boolean;
+  canConclude?: boolean;
   onUpdate: (id: string, updates: Partial<Ticket>) => void;
   onConclude: (ticket: Ticket) => void;
   onEdit: (ticket: Ticket) => void;
@@ -33,6 +35,8 @@ export const TicketRow: React.FC<TicketRowProps> = ({
   responsibles,
   statuses,
   priorities,
+  canEdit = true,
+  canConclude = true,
   onUpdate,
   onConclude,
   onEdit,
@@ -267,23 +271,27 @@ export const TicketRow: React.FC<TicketRowProps> = ({
       <td className="px-4 py-2 whitespace-nowrap text-right">
         <div className="flex items-center justify-end gap-1.5">
           {/* Concluir / Arquivar Soft-Delete Button */}
-          <button
-            onClick={() => onConclude(ticket)}
-            className="flex items-center gap-1 bg-emerald-950/40 hover:bg-emerald-600 text-emerald-400 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-800/60 transition cursor-pointer group shadow-sm"
-            title="Concluir chamado (Arquivar para Histórico)"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 group-hover:text-white" />
-            <span className="hidden xl:inline">Concluir</span>
-          </button>
+          {canConclude && (
+            <button
+              onClick={() => onConclude(ticket)}
+              className="flex items-center gap-1 bg-emerald-950/40 hover:bg-emerald-600 text-emerald-400 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold border border-emerald-800/60 transition cursor-pointer group shadow-sm"
+              title="Concluir chamado (Arquivar para Histórico)"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 group-hover:text-white" />
+              <span className="hidden xl:inline">Concluir</span>
+            </button>
+          )}
 
           {/* Editar Modal */}
-          <button
-            onClick={() => onEdit(ticket)}
-            className="p-1.5 text-slate-400 hover:text-teal-300 hover:bg-[#071922] rounded-lg transition cursor-pointer"
-            title="Editar chamado completo"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-          </button>
+          {canEdit && (
+            <button
+              onClick={() => onEdit(ticket)}
+              className="p-1.5 text-slate-400 hover:text-teal-300 hover:bg-[#071922] rounded-lg transition cursor-pointer"
+              title="Editar chamado completo"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+            </button>
+          )}
 
           {/* Linha do Tempo / Histórico */}
           <button

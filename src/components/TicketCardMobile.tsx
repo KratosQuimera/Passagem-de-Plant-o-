@@ -14,6 +14,8 @@ import { Ticket } from '../types';
 
 interface TicketCardMobileProps {
   ticket: Ticket;
+  canEdit?: boolean;
+  canConclude?: boolean;
   onConclude: (ticket: Ticket) => void;
   onEdit: (ticket: Ticket) => void;
   onViewHistory: (ticket: Ticket) => void;
@@ -21,6 +23,8 @@ interface TicketCardMobileProps {
 
 export const TicketCardMobile: React.FC<TicketCardMobileProps> = ({
   ticket,
+  canEdit = true,
+  canConclude = true,
   onConclude,
   onEdit,
   onViewHistory,
@@ -86,26 +90,30 @@ export const TicketCardMobile: React.FC<TicketCardMobileProps> = ({
       </div>
 
       {/* Action buttons */}
-      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-teal-900/60">
-        <button
-          onClick={() => onConclude(ticket)}
-          className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white py-1.5 px-2 rounded-xl text-xs font-bold shadow transition cursor-pointer"
-        >
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Concluir</span>
-        </button>
+      <div className="flex items-center gap-2 pt-2 border-t border-teal-900/60">
+        {canConclude && (
+          <button
+            onClick={() => onConclude(ticket)}
+            className="flex-1 flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white py-1.5 px-2 rounded-xl text-xs font-bold shadow transition cursor-pointer"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Concluir</span>
+          </button>
+        )}
 
-        <button
-          onClick={() => onEdit(ticket)}
-          className="flex items-center justify-center gap-1.5 bg-[#09222c] hover:bg-[#0c2e3b] text-slate-200 py-1.5 px-2 rounded-xl text-xs font-medium border border-teal-800/60 transition cursor-pointer"
-        >
-          <Edit3 className="w-3.5 h-3.5 text-teal-400" />
-          <span>Editar</span>
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => onEdit(ticket)}
+            className="flex-1 flex items-center justify-center gap-1.5 bg-[#09222c] hover:bg-[#0c2e3b] text-slate-200 py-1.5 px-2 rounded-xl text-xs font-medium border border-teal-800/60 transition cursor-pointer"
+          >
+            <Edit3 className="w-3.5 h-3.5 text-teal-400" />
+            <span>Editar</span>
+          </button>
+        )}
 
         <button
           onClick={() => onViewHistory(ticket)}
-          className="flex items-center justify-center gap-1.5 bg-[#09222c] hover:bg-[#0c2e3b] text-slate-300 py-1.5 px-2 rounded-xl text-xs font-medium border border-teal-800/60 transition cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-1.5 bg-[#09222c] hover:bg-[#0c2e3b] text-slate-300 py-1.5 px-2 rounded-xl text-xs font-medium border border-teal-800/60 transition cursor-pointer"
         >
           <History className="w-3.5 h-3.5 text-amber-400" />
           <span>Histórico</span>

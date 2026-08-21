@@ -4,7 +4,7 @@ import { AppDatabase, UserProfile } from '../types';
 
 export function useAppDatabase() {
   const [db, setDb] = useState<AppDatabase>(dbStore.getDatabase());
-  const [currentUser, setCurrentUser] = useState<UserProfile>(dbStore.getCurrentUser());
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(dbStore.getCurrentUser());
 
   useEffect(() => {
     const unsubscribe = dbStore.subscribe(() => {
@@ -50,6 +50,7 @@ export function useAppDatabase() {
     updateSettings: dbStore.updateSettings.bind(dbStore),
     saveShiftReport: dbStore.saveShiftReport.bind(dbStore),
     setCurrentUser: dbStore.setCurrentUser.bind(dbStore),
+    logout: dbStore.logout.bind(dbStore),
     addUser: dbStore.addUser.bind(dbStore),
     updateUser: dbStore.updateUser.bind(dbStore),
     deleteUser: dbStore.deleteUser.bind(dbStore),

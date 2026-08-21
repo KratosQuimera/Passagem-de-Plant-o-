@@ -20,7 +20,7 @@ import {
 import { PriorityBadge } from './PriorityBadge';
 import { StatusBadge } from './StatusBadge';
 import { exportTicketsToExcel, exportTicketsToCSV } from '../utils/exportUtils';
-import { Ticket, AreaItem, ResponsibleItem, StatusItem } from '../types';
+import { Ticket, AreaItem, ResponsibleItem, StatusItem, UserProfile } from '../types';
 
 interface HistoryViewProps {
   archivedTickets: Ticket[];
@@ -28,6 +28,7 @@ interface HistoryViewProps {
   areas: AreaItem[];
   responsibles: ResponsibleItem[];
   statuses: StatusItem[];
+  currentUser?: UserProfile;
   onViewTimeline: (ticket: Ticket) => void;
   onReopenTicket: (ticket: Ticket) => void;
 }
@@ -40,9 +41,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
   areas,
   responsibles,
   statuses,
+  currentUser,
   onViewTimeline,
   onReopenTicket,
 }) => {
+  const canReopen = currentUser?.permissoes?.pode_reabrir_chamado ?? true;
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArea, setSelectedArea] = useState('TODAS');
   const [selectedPriority, setSelectedPriority] = useState('TODAS');
@@ -521,14 +524,16 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                           <History className="w-3 h-3 text-teal-400" />
                           <span>Auditoria</span>
                         </button>
-                        <button
-                          onClick={() => onReopenTicket(t)}
-                          className="flex items-center gap-1 bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white px-2.5 py-1 rounded text-xs border border-cyan-500/40 transition cursor-pointer"
-                          title="Reativar chamado de volta ao painel de plantão"
-                        >
-                          <RotateCcw className="w-3 h-3" />
-                          <span>Reabrir</span>
-                        </button>
+                        {canReopen && (
+                          <button
+                            onClick={() => onReopenTicket(t)}
+                            className="flex items-center gap-1 bg-cyan-600/20 hover:bg-cyan-600 text-cyan-300 hover:text-white px-2.5 py-1 rounded text-xs border border-cyan-500/40 transition cursor-pointer"
+                            title="Reativar chamado de volta ao painel de plantão"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            <span>Reabrir</span>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

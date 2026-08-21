@@ -33,6 +33,8 @@ export interface UserPermissions {
 export interface UserProfile {
   id: string;
   nome: string;
+  usuario: string;
+  senha: string;
   email: string;
   cargo: string;
   role: UserRole;

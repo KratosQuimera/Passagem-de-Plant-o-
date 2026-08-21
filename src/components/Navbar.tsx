@@ -17,7 +17,9 @@ import {
   Layers,
   Sparkles,
   Mail,
-  Send
+  Send,
+  LogOut,
+  Lock
 } from 'lucide-react';
 import { UserProfile, AppSettings } from '../types';
 import { OswaldoCruzLogo } from './OswaldoCruzLogo';
@@ -32,6 +34,7 @@ interface NavbarProps {
   currentUser: UserProfile;
   users: UserProfile[];
   onSwitchUser: (user: UserProfile) => void;
+  onLogout?: () => void;
   settings: AppSettings;
 }
 
@@ -45,6 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   users,
   onSwitchUser,
+  onLogout,
   settings,
 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -247,6 +251,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
                     ))}
                   </div>
+
+                  {onLogout && (
+                    <div className="pt-2 mt-2 border-t border-teal-900/80">
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          onLogout();
+                        }}
+                        className="w-full flex items-center justify-center gap-1.5 p-2 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs font-bold border border-rose-900/60 transition cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                        <span>Sair / Bloquear Sessão</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -380,15 +399,29 @@ export const Navbar: React.FC<NavbarProps> = ({
               </nav>
             </div>
 
-            <div className="pt-4 border-t border-teal-900">
-              <div className="flex items-center gap-2.5 text-xs text-slate-300">
-                <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white uppercase">
-                  {currentUser.nome.substring(0, 2)}
+            <div className="pt-4 border-t border-teal-900 space-y-3">
+              <div className="flex items-center justify-between gap-2.5 text-xs text-slate-300">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center font-bold text-white uppercase">
+                    {currentUser.nome.substring(0, 2)}
+                  </div>
+                  <div>
+                    <div className="font-bold text-white">{currentUser.nome}</div>
+                    <div className="text-[10px] text-teal-400/80">{currentUser.cargo}</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-bold text-white">{currentUser.nome}</div>
-                  <div className="text-[10px] text-teal-400/80">{currentUser.cargo}</div>
-                </div>
+                {onLogout && (
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      onLogout();
+                    }}
+                    className="p-2 bg-rose-950/60 text-rose-300 rounded-lg border border-rose-800"
+                    title="Sair / Desconectar"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             </div>
           </div>

@@ -7,7 +7,7 @@ const CURRENT_USER_KEY = 'painel_plantao_ti_current_user_v1';
 class DatabaseStore {
   private db: AppDatabase;
   private listeners: Set<() => void> = new Set();
-  private currentUser: UserProfile;
+  private currentUser: UserProfile | null;
 
   constructor() {
     this.db = this.loadFromStorage();
@@ -21,10 +21,17 @@ class DatabaseStore {
         const parsed = JSON.parse(stored);
         // Merge with initial defaults if missing fields
         const initial = getInitialDatabase();
+        const rawUsers = parsed.users || initial.users;
+        const users: UserProfile[] = rawUsers.map((u: any, idx: number) => ({
+          ...u,
+          usuario: u.usuario || (u.nome ? u.nome.split(' ')[0] : `usuario${idx + 1}`),
+          senha: u.senha || '16763',
+        }));
+
         return {
           tickets: parsed.tickets || initial.tickets,
           history: parsed.history || initial.history,
-          users: parsed.users || initial.users,
+          users,
           areas: parsed.areas || initial.areas,
           responsibles: parsed.responsibles || initial.responsibles,
           statuses: parsed.statuses || initial.statuses,
@@ -41,24 +48,17 @@ class DatabaseStore {
     return initial;
   }
 
-  private loadCurrentUser(): UserProfile {
+  private loadCurrentUser(): UserProfile | null {
     try {
       const stored = localStorage.getItem(CURRENT_USER_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.id) return parsed;
       }
     } catch (e) {
       console.error('Error loading user from localStorage:', e);
     }
-    // Default to Wagner Marcelino (Admin)
-    return this.db.users[0] || {
-      id: 'usr-1',
-      nome: 'Wagner Marcelino',
-      email: 'wagner.marcelino@hospital.org.br',
-      cargo: 'Analista de Suporte Sênior',
-      role: 'admin',
-      ativo: true,
-    };
+    return null;
   }
 
   private saveToStorage(database: AppDatabase) {
@@ -85,18 +85,26 @@ class DatabaseStore {
     return this.db;
   }
 
-  public getCurrentUser(): UserProfile {
+  public getCurrentUser(): UserProfile | null {
     return this.currentUser;
   }
 
-  public setCurrentUser(user: UserProfile) {
+  public setCurrentUser(user: UserProfile | null) {
     this.currentUser = user;
     try {
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+      if (user) {
+        localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+      } else {
+        localStorage.removeItem(CURRENT_USER_KEY);
+      }
     } catch (e) {
       console.error('Error saving current user:', e);
     }
     this.notify();
+  }
+
+  public logout() {
+    this.setCurrentUser(null);
   }
 
   // --- TICKET OPERATIONS ---
@@ -431,7 +439,7 @@ class DatabaseStore {
     const index = this.db.users.findIndex((u) => u.id === id);
     if (index !== -1) {
       this.db.users[index] = { ...this.db.users[index], ...updates };
-      if (this.currentUser.id === id) {
+      if (this.currentUser && this.currentUser.id === id) {
         this.currentUser = this.db.users[index];
       }
       this.notify();
@@ -443,15 +451,15 @@ class DatabaseStore {
       throw new Error('Não é possível excluir o único usuário do sistema.');
     }
     this.db.users = this.db.users.filter((u) => u.id !== id);
-    if (this.currentUser.id === id) {
-      this.currentUser = this.db.users[0];
+    if (this.currentUser && this.currentUser.id === id) {
+      this.currentUser = this.db.users[0] || null;
     }
     this.notify();
   }
 
   public resetToDefaults() {
     this.db = getInitialDatabase();
-    this.currentUser = this.db.users[0];
+    this.currentUser = null;
     this.notify();
   }
 }
