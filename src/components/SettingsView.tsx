@@ -83,6 +83,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   // User Management State
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [inlineEditingCargoUserId, setInlineEditingCargoUserId] = useState<string | null>(null);
+  const [inlineCargoValue, setInlineCargoValue] = useState<string>('');
   const [userFormData, setUserFormData] = useState<{
     nome: string;
     usuario: string;
@@ -158,6 +160,26 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       permissoes: user.permissoes || getDefaultPermissions(user.role),
     });
     setIsUserModalOpen(true);
+  };
+
+  const handleStartInlineCargoEdit = (user: UserProfile) => {
+    if (!isAdmin) return;
+    setInlineEditingCargoUserId(user.id);
+    setInlineCargoValue(user.cargo || '');
+  };
+
+  const handleSaveInlineCargo = (userId: string) => {
+    if (!isAdmin || !onUpdateUser) return;
+    const targetUser = users.find((u) => u.id === userId);
+    if (!targetUser) return;
+    const newCargo = inlineCargoValue.trim() || 'Técnico de Suporte TI';
+    onUpdateUser(userId, { cargo: newCargo });
+    setInlineEditingCargoUserId(null);
+  };
+
+  const handleCancelInlineCargo = () => {
+    setInlineEditingCargoUserId(null);
+    setInlineCargoValue('');
   };
 
   const handleRoleChange = (role: UserRole) => {
@@ -456,9 +478,66 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                           )}
                         </div>
                         {/* Cargo / Função editável */}
-                        <div className="text-xs text-teal-300/90 font-medium mt-0.5 truncate">
-                          {user.cargo || 'Cargo não informado'}
-                        </div>
+                        {inlineEditingCargoUserId === user.id ? (
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              handleSaveInlineCargo(user.id);
+                            }}
+                            className="flex items-center gap-1.5 mt-1"
+                          >
+                            <input
+                              type="text"
+                              autoFocus
+                              value={inlineCargoValue}
+                              onChange={(e) => setInlineCargoValue(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Escape') handleCancelInlineCargo();
+                              }}
+                              placeholder="Ex: Analista de risco Sênior"
+                              className="bg-[#041117] border border-teal-400 text-teal-200 text-xs px-2.5 py-1 rounded-lg outline-none focus:ring-1 focus:ring-teal-300 w-full max-w-[240px] font-medium shadow-inner"
+                            />
+                            <button
+                              type="submit"
+                              className="p-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg cursor-pointer shadow transition"
+                              title="Salvar Cargo (Enter)"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleCancelInlineCargo}
+                              className="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg cursor-pointer transition"
+                              title="Cancelar (Esc)"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </form>
+                        ) : (
+                          <div className="flex items-center gap-1.5 mt-0.5 group">
+                            <span
+                              onClick={() => isAdmin && handleStartInlineCargoEdit(user)}
+                              className={`text-xs text-teal-300/90 font-medium truncate ${
+                                isAdmin
+                                  ? 'cursor-pointer hover:text-teal-200 hover:underline decoration-dashed decoration-teal-500/60 underline-offset-2'
+                                  : ''
+                              }`}
+                              title={isAdmin ? 'Clique para editar o cargo/função diretamente' : undefined}
+                            >
+                              {user.cargo || 'Cargo não informado'}
+                            </span>
+                            {isAdmin && (
+                              <button
+                                type="button"
+                                onClick={() => handleStartInlineCargoEdit(user)}
+                                className="opacity-60 group-hover:opacity-100 p-0.5 text-teal-400 hover:text-white transition cursor-pointer"
+                                title="Editar cargo/função"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        )}
                         {/* @usuario • email */}
                         <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5 flex-wrap">
                           <span className="text-teal-400 font-bold">@ {user.usuario || user.nome.split(' ')[0]}</span>
