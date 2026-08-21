@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-[#07171e] text-slate-200 antialiased font-sans;
+    min-height: 100vh;
+  }
+}
+
+/* Hospital Alemão Oswaldo Cruz Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #07171e;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #123746;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00a2b4;
+}
+
+/* Utility to hide scrollbar while allowing scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

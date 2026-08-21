@@ -1,0 +1,6 @@
+{
+  "name": "Painel de Passagem de Plantão TI",
+  "description": "Sistema Web moderno e responsivo para controle, acompanhamento, conclusão e passagem de plantão de chamados de TI com histórico completo e relatórios.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
