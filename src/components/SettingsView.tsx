@@ -125,15 +125,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [formData, setFormData] = useState<AppSettings>(settings);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const isAdmin = currentUser?.role === 'admin';
+
   // --- USER HANDLERS ---
   const handleOpenAddUser = () => {
+    if (!isAdmin) return;
     setEditingUser(null);
     setUserFormData({
       nome: '',
       usuario: '',
       senha: '16763',
       email: '',
-      cargo: 'Técnico de Suporte TI',
+      cargo: '',
       role: 'operador',
       ativo: true,
       permissoes: getDefaultPermissions('operador'),
@@ -142,13 +145,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   const handleOpenEditUser = (user: UserProfile) => {
+    if (!isAdmin) return;
     setEditingUser(user);
     setUserFormData({
       nome: user.nome,
       usuario: user.usuario || user.nome.split(' ')[0],
       senha: user.senha || '16763',
       email: user.email,
-      cargo: user.cargo,
+      cargo: user.cargo || '',
       role: user.role,
       ativo: user.ativo,
       permissoes: user.permissoes || getDefaultPermissions(user.role),
@@ -176,10 +180,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   const handleSaveUser = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!userFormData.nome.trim()) return;
 
     const fallbackUsername = userFormData.usuario.trim() || userFormData.nome.trim().split(' ')[0];
     const fallbackPassword = userFormData.senha.trim() || '16763';
+    const cleanCargo = userFormData.cargo.trim() || 'Técnico de Suporte TI';
 
     if (editingUser && onUpdateUser) {
       onUpdateUser(editingUser.id, {
@@ -187,7 +193,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         usuario: fallbackUsername,
         senha: fallbackPassword,
         email: userFormData.email.trim(),
-        cargo: userFormData.cargo.trim(),
+        cargo: cleanCargo,
         role: userFormData.role,
         ativo: userFormData.ativo,
         permissoes: userFormData.permissoes,
@@ -198,7 +204,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         usuario: fallbackUsername,
         senha: fallbackPassword,
         email: userFormData.email.trim(),
-        cargo: userFormData.cargo.trim(),
+        cargo: cleanCargo,
         role: userFormData.role,
         ativo: userFormData.ativo,
         permissoes: userFormData.permissoes,
@@ -208,6 +214,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   const handleConfirmDeleteUser = () => {
+    if (!isAdmin) return;
     if (userToDelete && onDeleteUser) {
       onDeleteUser(userToDelete.id);
       setUserToDelete(null);
@@ -216,12 +223,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   // --- AREA HANDLERS ---
   const handleOpenAddArea = () => {
+    if (!isAdmin) return;
     setEditingArea(null);
     setAreaFormData({ nome: '', descricao: '', ativo: true });
     setIsAreaModalOpen(true);
   };
 
   const handleOpenEditArea = (area: AreaItem) => {
+    if (!isAdmin) return;
     setEditingArea(area);
     setAreaFormData({
       nome: area.nome,
@@ -233,6 +242,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   const handleSaveArea = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     if (!areaFormData.nome.trim()) return;
 
     if (editingArea) {
@@ -248,6 +258,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   const handleConfirmDeleteArea = () => {
+    if (!isAdmin) return;
     if (areaToDelete && onDeleteArea) {
       onDeleteArea(areaToDelete.id);
       setAreaToDelete(null);
@@ -257,6 +268,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   // --- SETTINGS FORM ---
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) return;
     onUpdateSettings(formData);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
@@ -292,12 +304,33 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="bg-teal-950/80 text-teal-300 border border-teal-700/60 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5">
+          <span className={`px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 ${
+            isAdmin 
+              ? 'bg-amber-950/80 text-amber-300 border border-amber-700/60'
+              : 'bg-teal-950/80 text-teal-300 border border-teal-700/60'
+          }`}>
             <ShieldCheck className="w-4 h-4 text-teal-400" />
-            <span>Perfil Ativo: {currentUser.nome} ({currentUser.role.toUpperCase()})</span>
+            <span>Perfil: {currentUser.nome} ({currentUser.role.toUpperCase()})</span>
           </span>
         </div>
       </div>
+
+      {/* Non-Admin Restriction Warning Banner */}
+      {!isAdmin && (
+        <div className="bg-amber-950/30 border border-amber-800/60 rounded-2xl p-4 flex items-start gap-3 text-amber-200 text-xs">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <div className="font-bold text-amber-300">
+              Modo Somente Leitura — Acesso Restrito a Administradores
+            </div>
+            <p className="text-amber-200/80 leading-relaxed">
+              Você está autenticado como <strong>{currentUser.nome}</strong> ({currentUser.cargo || currentUser.role}). 
+              Apenas usuários com perfil de <strong>Administrador</strong> têm permissão para cadastrar, editar ou excluir colaboradores, setores e configurações globais. 
+              Suas permissões operacionais de atendimento a chamados permanecem ativas nos painéis de plantão.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Settings Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-teal-900/60 pb-2 overflow-x-auto no-scrollbar">
@@ -372,17 +405,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <span>Usuários, Níveis de Acesso e Permissões</span>
               </h3>
               <p className="text-xs text-teal-300/80 mt-0.5">
-                Controle quem pode abrir chamados, concluir, excluir usuários, gerenciar setores e disparar relatórios
+                Controle quem pode abrir chamados, concluir, gerenciar setores e disparar relatórios
               </p>
             </div>
 
-            <button
-              onClick={handleOpenAddUser}
-              className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer border border-teal-400/30"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>+ NOVO USUÁRIO</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleOpenAddUser}
+                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer border border-teal-400/30"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>+ NOVO USUÁRIO</span>
+              </button>
+            )}
           </div>
 
           {/* Users List Grid */}
@@ -394,15 +429,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               return (
                 <div
                   key={user.id}
-                  className={`bg-[#06151c] border rounded-xl p-4 space-y-3 transition ${
+                  className={`bg-[#06151c] border rounded-2xl p-5 space-y-4 transition ${
                     user.ativo 
                       ? isCurrentUser ? 'border-teal-400/60 ring-1 ring-teal-500/20' : 'border-teal-900/80' 
                       : 'border-slate-800 opacity-60'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs uppercase shadow ${
+                    <div className="flex items-start gap-3 min-w-0">
+                      <div className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs uppercase shadow shrink-0 mt-0.5 ${
                         user.role === 'admin'
                           ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                           : user.role === 'coordenador'
@@ -411,26 +446,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       }`}>
                         {user.nome.substring(0, 2)}
                       </div>
-                      <div>
-                        <div className="font-bold text-white text-sm flex items-center gap-1.5">
-                          <span>{user.nome}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-bold text-white text-sm flex items-center gap-1.5 flex-wrap">
+                          <span className="truncate">{user.nome}</span>
                           {isCurrentUser && (
-                            <span className="text-[10px] bg-teal-950 text-teal-300 px-2 py-0.2 rounded-full border border-teal-800">
+                            <span className="text-[10px] bg-teal-950 text-teal-300 px-2 py-0.5 rounded-full border border-teal-800 font-bold shrink-0">
                               Você
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-teal-300/80">{user.cargo}</div>
-                        <div className="text-[11px] text-slate-400 font-mono flex items-center gap-2">
-                          <span className="text-teal-400 font-bold">@{user.usuario || user.nome.split(' ')[0]}</span>
-                          <span>•</span>
-                          <span>{user.email}</span>
+                        {/* Cargo / Função editável */}
+                        <div className="text-xs text-teal-300/90 font-medium mt-0.5 truncate">
+                          {user.cargo || 'Cargo não informado'}
+                        </div>
+                        {/* @usuario • email */}
+                        <div className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-1.5 flex-wrap">
+                          <span className="text-teal-400 font-bold">@ {user.usuario || user.nome.split(' ')[0]}</span>
+                          <span className="text-slate-600">•</span>
+                          <span className="text-slate-300 truncate">{user.email}</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-1">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${
                         user.role === 'admin'
                           ? 'bg-amber-950 text-amber-300 border border-amber-800'
                           : user.role === 'coordenador'
@@ -439,78 +478,88 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                           ? 'bg-teal-950 text-teal-300 border border-teal-800'
                           : 'bg-slate-900 text-slate-400 border border-slate-700'
                       }`}>
-                        {user.role}
+                        {user.role === 'admin' ? 'ADMINISTRADOR' : user.role.toUpperCase()}
                       </span>
-                      <span className={`text-[10px] ${user.ativo ? 'text-emerald-400' : 'text-rose-400 font-semibold'}`}>
-                        {user.ativo ? '● Ativo' : '○ Inativo'}
+                      <span className={`text-[10px] flex items-center gap-1 ${user.ativo ? 'text-emerald-400 font-medium' : 'text-rose-400 font-semibold'}`}>
+                        <span>{user.ativo ? '●' : '○'}</span>
+                        <span>{user.ativo ? 'Ativo' : 'Inativo'}</span>
                       </span>
                     </div>
                   </div>
 
                   {/* Permissions Summary Badges */}
                   <div className="pt-2 border-t border-teal-950/80">
-                    <div className="text-[10px] text-teal-400 font-bold uppercase tracking-wider mb-1.5">
-                      Permissões Ativas:
+                    <div className="text-[10px] text-teal-400 font-bold uppercase tracking-wider mb-2">
+                      PERMISSÕES ATIVAS:
                     </div>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1.5">
                       {perms.pode_criar_chamado && (
-                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-1.5 py-0.5 rounded border border-teal-900">
+                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-2 py-0.5 rounded border border-teal-900 font-medium">
                           Criar Chamado
                         </span>
                       )}
                       {perms.pode_editar_chamado && (
-                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-1.5 py-0.5 rounded border border-teal-900">
+                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-2 py-0.5 rounded border border-teal-900 font-medium">
                           Editar Chamado
                         </span>
                       )}
                       {perms.pode_concluir_chamado && (
-                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-1.5 py-0.5 rounded border border-teal-900">
-                          Concluir/Arquivar
+                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-2 py-0.5 rounded border border-teal-900 font-medium">
+                          Concluir / Arquivar
                         </span>
                       )}
                       {perms.pode_reabrir_chamado && (
-                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-1.5 py-0.5 rounded border border-teal-900">
+                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-2 py-0.5 rounded border border-teal-900 font-medium">
                           Reabrir
                         </span>
                       )}
                       {perms.pode_gerenciar_usuarios && (
-                        <span className="text-[10px] bg-amber-950/60 text-amber-300 px-1.5 py-0.5 rounded border border-amber-800/60">
+                        <span className="text-[10px] bg-amber-950/60 text-amber-300 px-2 py-0.5 rounded border border-amber-800/60 font-medium">
                           Gerenciar Usuários
                         </span>
                       )}
                       {perms.pode_gerenciar_areas && (
-                        <span className="text-[10px] bg-cyan-950/60 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-800/60">
+                        <span className="text-[10px] bg-cyan-950/60 text-cyan-300 px-2 py-0.5 rounded border border-cyan-800/60 font-medium">
                           Gerenciar Setores
                         </span>
                       )}
                       {perms.pode_disparar_email && (
-                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-1.5 py-0.5 rounded border border-teal-900">
+                        <span className="text-[10px] bg-[#09222c] text-teal-200 px-2 py-0.5 rounded border border-teal-900 font-medium">
                           Disparar E-mail
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {/* Actions for User */}
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-teal-950">
-                    <button
-                      onClick={() => handleOpenEditUser(user)}
-                      className="flex items-center gap-1 text-xs bg-[#09222c] hover:bg-[#0c2e3b] text-teal-300 px-3 py-1.5 rounded-lg border border-teal-800/80 transition cursor-pointer font-semibold"
-                    >
-                      <Edit2 className="w-3.5 h-3.5 text-teal-400" />
-                      <span>Modificar Acesso & Permissões</span>
-                    </button>
+                  {/* Actions for User (Admin Only) */}
+                  {isAdmin ? (
+                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-teal-950">
+                      <button
+                        onClick={() => handleOpenEditUser(user)}
+                        className="flex items-center gap-1.5 text-xs bg-[#09222c] hover:bg-[#0c2e3b] text-teal-300 hover:text-white px-3 py-1.5 rounded-xl border border-teal-800/80 transition cursor-pointer font-semibold"
+                      >
+                        <Edit2 className="w-3.5 h-3.5 text-teal-400" />
+                        <span>Modificar acesso e permissões</span>
+                      </button>
 
-                    <button
-                      onClick={() => setUserToDelete(user)}
-                      disabled={users.length <= 1}
-                      className="flex items-center gap-1 text-xs bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 px-3 py-1.5 rounded-lg border border-rose-900/60 transition cursor-pointer font-semibold disabled:opacity-30 disabled:cursor-not-allowed"
-                      title={users.length <= 1 ? 'Não é possível excluir o único usuário' : 'Excluir usuário'}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      <span>Excluir</span>
-                    </button>
-                  </div>
+                      <button
+                        onClick={() => setUserToDelete(user)}
+                        disabled={users.length <= 1}
+                        className="flex items-center gap-1.5 text-xs bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-white px-3 py-1.5 rounded-xl border border-rose-900/60 transition cursor-pointer font-semibold disabled:opacity-30 disabled:cursor-not-allowed"
+                        title={users.length <= 1 ? 'Não é possível excluir o único usuário' : 'Excluir usuário'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Excluir</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between pt-2 border-t border-teal-950 text-[11px] text-slate-500">
+                      <span className="flex items-center gap-1 text-slate-400">
+                        <Lock className="w-3 h-3 text-amber-400/80" />
+                        <span>Alterações restritas a Administradores</span>
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -532,13 +581,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </p>
             </div>
 
-            <button
-              onClick={handleOpenAddArea}
-              className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer border border-teal-400/30"
-            >
-              <Plus className="w-4 h-4" />
-              <span>+ NOVO SETOR</span>
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleOpenAddArea}
+                className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer border border-teal-400/30"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ NOVO SETOR</span>
+              </button>
+            )}
           </div>
 
           {/* Areas Grid */}
@@ -567,32 +618,38 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-teal-950">
-                  <button
-                    onClick={() => onToggleArea(area.id)}
-                    className={`text-[11px] font-semibold transition cursor-pointer ${
-                      area.ativo ? 'text-amber-400 hover:underline' : 'text-emerald-400 hover:underline'
-                    }`}
-                  >
-                    {area.ativo ? 'Desativar' : 'Ativar'}
-                  </button>
+                  {isAdmin ? (
+                    <>
+                      <button
+                        onClick={() => onToggleArea(area.id)}
+                        className={`text-[11px] font-semibold transition cursor-pointer ${
+                          area.ativo ? 'text-amber-400 hover:underline' : 'text-emerald-400 hover:underline'
+                        }`}
+                      >
+                        {area.ativo ? 'Desativar' : 'Ativar'}
+                      </button>
 
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleOpenEditArea(area)}
-                      className="p-1.5 bg-[#09222c] hover:bg-[#0c2e3b] text-teal-300 rounded-lg border border-teal-800/80 transition cursor-pointer"
-                      title="Editar Setor"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleOpenEditArea(area)}
+                          className="p-1.5 bg-[#09222c] hover:bg-[#0c2e3b] text-teal-300 rounded-lg border border-teal-800/80 transition cursor-pointer"
+                          title="Editar Setor"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
 
-                    <button
-                      onClick={() => setAreaToDelete(area)}
-                      className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 rounded-lg border border-rose-900/60 transition cursor-pointer"
-                      title="Excluir Setor"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                        <button
+                          onClick={() => setAreaToDelete(area)}
+                          className="p-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 rounded-lg border border-rose-900/60 transition cursor-pointer"
+                          title="Excluir Setor"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <span className="text-[10px] text-slate-500 italic">Somente leitura</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -603,76 +660,78 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       {/* 3. RESPONSÁVEIS / PLANTONISTAS */}
       {activeTab === 'responsaveis' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Add Responsible Form */}
-          <div className="lg:col-span-4 bg-[#0a1e27] border border-teal-800/80 rounded-2xl p-5 shadow-lg space-y-4">
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Plus className="w-4 h-4 text-teal-400" />
-              <span>Cadastrar Novo Plantonista / Dupla</span>
-            </h3>
+          {/* Add Responsible Form (Admin Only) */}
+          {isAdmin ? (
+            <div className="lg:col-span-4 bg-[#0a1e27] border border-teal-800/80 rounded-2xl p-5 shadow-lg space-y-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Plus className="w-4 h-4 text-teal-400" />
+                <span>Cadastrar Novo Plantonista / Dupla</span>
+              </h3>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!newRespNome.trim()) return;
-                onAddResponsible(newRespNome.trim(), newRespCargo.trim(), newRespEmail.trim());
-                setNewRespNome('');
-                setNewRespCargo('');
-                setNewRespEmail('');
-              }}
-              className="space-y-3 text-xs"
-            >
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">
-                  Nome do Profissional / Dupla <span className="text-rose-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newRespNome}
-                  onChange={(e) => setNewRespNome(e.target.value)}
-                  placeholder="Ex: Wagner Marcelino ou Wagner/Elias"
-                  className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">
-                  Cargo / Especialidade
-                </label>
-                <input
-                  type="text"
-                  value={newRespCargo}
-                  onChange={(e) => setNewRespCargo(e.target.value)}
-                  placeholder="Ex: Suporte N2, Redes, Hardware..."
-                  className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">
-                  E-mail Corporativo
-                </label>
-                <input
-                  type="email"
-                  value={newRespEmail}
-                  onChange={(e) => setNewRespEmail(e.target.value)}
-                  placeholder="nome@hospital.org.br"
-                  className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 mt-2 shadow"
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!newRespNome.trim()) return;
+                  onAddResponsible(newRespNome.trim(), newRespCargo.trim(), newRespEmail.trim());
+                  setNewRespNome('');
+                  setNewRespCargo('');
+                  setNewRespEmail('');
+                }}
+                className="space-y-3 text-xs"
               >
-                <Plus className="w-4 h-4" />
-                <span>Adicionar à Lista</span>
-              </button>
-            </form>
-          </div>
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Nome do Profissional / Dupla <span className="text-rose-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={newRespNome}
+                    onChange={(e) => setNewRespNome(e.target.value)}
+                    placeholder="Ex: Wagner Marcelino ou Wagner/Elias"
+                    className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    Cargo / Especialidade
+                  </label>
+                  <input
+                    type="text"
+                    value={newRespCargo}
+                    onChange={(e) => setNewRespCargo(e.target.value)}
+                    placeholder="Ex: Suporte N2, Redes, Hardware..."
+                    className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-300 font-semibold mb-1">
+                    E-mail Corporativo
+                  </label>
+                  <input
+                    type="email"
+                    value={newRespEmail}
+                    onChange={(e) => setNewRespEmail(e.target.value)}
+                    placeholder="nome@hospital.org.br"
+                    className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white font-bold py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 mt-2 shadow"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Adicionar à Lista</span>
+                </button>
+              </form>
+            </div>
+          ) : null}
 
           {/* Responsibles List */}
-          <div className="lg:col-span-8 bg-[#0a1e27] border border-teal-800/80 rounded-2xl p-5 shadow-lg space-y-3">
+          <div className={`${isAdmin ? 'lg:col-span-8' : 'lg:col-span-12'} bg-[#0a1e27] border border-teal-800/80 rounded-2xl p-5 shadow-lg space-y-3`}>
             <h3 className="text-sm font-bold text-white flex items-center justify-between">
               <span>Lista de Responsáveis para Atribuição</span>
               <span className="text-xs text-teal-300/80 font-normal">
@@ -697,28 +756,34 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => onToggleResponsible(resp.id)}
-                      className={`px-2.5 py-1 rounded text-[11px] font-semibold border transition cursor-pointer ${
-                        resp.ativo
-                          ? 'bg-emerald-950/60 text-emerald-400 border-emerald-700/60 hover:bg-emerald-900/80'
-                          : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
-                      }`}
-                    >
-                      {resp.ativo ? 'Ativo' : 'Inativo'}
-                    </button>
-
-                    {onDeleteResponsible && (
+                  {isAdmin ? (
+                    <div className="flex items-center gap-2">
                       <button
-                        onClick={() => onDeleteResponsible(resp.id)}
-                        className="p-1 text-rose-400 hover:text-rose-300 cursor-pointer"
-                        title="Excluir responsável"
+                        onClick={() => onToggleResponsible(resp.id)}
+                        className={`px-2.5 py-1 rounded text-[11px] font-semibold border transition cursor-pointer ${
+                          resp.ativo
+                            ? 'bg-emerald-950/60 text-emerald-400 border-emerald-700/60 hover:bg-emerald-900/80'
+                            : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
+                        }`}
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {resp.ativo ? 'Ativo' : 'Inativo'}
                       </button>
-                    )}
-                  </div>
+
+                      {onDeleteResponsible && (
+                        <button
+                          onClick={() => onDeleteResponsible(resp.id)}
+                          className="p-1 text-rose-400 hover:text-rose-300 cursor-pointer"
+                          title="Excluir responsável"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <span className={`text-[11px] font-medium ${resp.ativo ? 'text-emerald-400' : 'text-slate-500'}`}>
+                      {resp.ativo ? '● Ativo' : '○ Inativo'}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
@@ -972,14 +1037,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">
-                    Cargo / Função
+                  <label className="block text-slate-300 font-semibold mb-1 flex items-center justify-between">
+                    <span>Cargo / Função</span>
+                    <span className="text-[10px] text-teal-400/80 font-normal">Exibido no perfil e nos chamados</span>
                   </label>
                   <input
                     type="text"
                     value={userFormData.cargo}
                     onChange={(e) => setUserFormData({ ...userFormData, cargo: e.target.value })}
-                    placeholder="Ex: Analista de Suporte Sênior"
+                    placeholder="Ex: Analista de risco Sênior, Técnico de Suporte TI..."
                     className="w-full bg-[#06151c] border border-teal-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-teal-400"
                   />
                 </div>

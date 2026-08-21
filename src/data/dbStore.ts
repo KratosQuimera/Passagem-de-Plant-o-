@@ -53,7 +53,13 @@ class DatabaseStore {
       const stored = localStorage.getItem(CURRENT_USER_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed && parsed.id) return parsed;
+        if (parsed && (parsed.id || parsed.usuario)) {
+          const found = this.db.users.find(
+            (u) => u.id === parsed.id || (u.usuario && parsed.usuario && u.usuario.toLowerCase() === parsed.usuario.toLowerCase())
+          );
+          if (found) return found;
+          return parsed;
+        }
       }
     } catch (e) {
       console.error('Error loading user from localStorage:', e);

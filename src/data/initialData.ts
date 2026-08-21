@@ -68,12 +68,12 @@ export const defaultSettings: AppSettings = {
 };
 
 export const defaultUsers: UserProfile[] = [
-  { id: 'usr-1', nome: 'Wagner Marcelino', usuario: 'Wagner', senha: '16763', email: 'wagner.marcelino@hospital.org.br', cargo: 'Analista de Suporte Sênior', role: 'admin', permissoes: getDefaultPermissions('admin'), ativo: true },
+  { id: 'usr-1', nome: 'Wagner Marcelino', usuario: 'Wagner', senha: '16763', email: 'wagner.marcelino@hospital.org.br', cargo: 'Analista de risco Sênior', role: 'admin', permissoes: getDefaultPermissions('admin'), ativo: true },
   { id: 'usr-2', nome: 'Elias de Morais', usuario: 'Elias', senha: '16763', email: 'elias.morais@hospital.org.br', cargo: 'Técnico de Suporte TI', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
   { id: 'usr-3', nome: 'Edilson Aparecido', usuario: 'Edilson', senha: '16763', email: 'edilson.aparecido@hospital.org.br', cargo: 'Técnico de Redes e Infra', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
   { id: 'usr-4', nome: 'Cai Cesar', usuario: 'Cai', senha: '16763', email: 'cai.cesar@hospital.org.br', cargo: 'Analista de Sistemas', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
   { id: 'usr-5', nome: 'Pedro Augusto', usuario: 'Pedro', senha: '16763', email: 'pedro.augusto@hospital.org.br', cargo: 'Técnico de Hardware', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
-  { id: 'usr-6', nome: 'Hugo Alves', usuario: 'Hugo', senha: '16763', email: 'hugo.alves@hospital.org.br', cargo: 'Suporte Técnico N1', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
+  { id: 'usr-6', nome: 'Hugo Alves', usuario: 'Hugo', senha: '16763', email: '1120397@haoc.com.br', cargo: 'Analista de Suporte', role: 'operador', permissoes: getDefaultPermissions('operador'), ativo: true },
   { id: 'usr-7', nome: 'Fátima Araújo', usuario: 'Fatima', senha: '16763', email: 'fatima.araujo@hospital.org.br', cargo: 'Supervisora de TI e Plantão', role: 'coordenador', permissoes: getDefaultPermissions('coordenador'), ativo: true },
 ];
 
